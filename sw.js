@@ -5,8 +5,9 @@ const urlsToCache = [
   './index.html',   
   './price-compare.html',        // הקובץ הראשי (חובה!)
   './manifest.json', // המניפסט שלך
-  './icon.png'          // האייקון שלך
-];
+  './icon.png' 
+  './sw.js'  
+  ];
 
 // --- מכאן והלאה הקוד שלך מצוין, לא נגעתי ---
 
@@ -47,3 +48,4 @@ self.addEventListener('fetch', event => {
       .catch(() => caches.match(event.request))
   );
 });
+
