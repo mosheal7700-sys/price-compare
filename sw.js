@@ -4,7 +4,7 @@ const urlsToCache = [
   './index.html',
   './price-compare.html',
   './manifest.json',
-  './icon.jpg' 
+  './icon.png' 
 ];
 
 // --- מכאן והלאה הקוד שלך מצוין, לא נגעתי ---
@@ -46,6 +46,7 @@ self.addEventListener('fetch', event => {
       .catch(() => caches.match(event.request))
   );
 });
+
 
 
 
