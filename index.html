@@ -3,32 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <title>השוואת מחיר לפי משקל</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
-  <link rel="icon" href="icon.jpg">
-  <link rel="apple-touch-icon" href="icon.jpg">
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#0f9b8e">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="מחיר/משקל">
 
-  <meta property="og:title" content="השוואת מחיר לפי משקל">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://mosheal7700-sys.github.io/price-compare/"> 
-  <meta property="og:image" content="https://mosheal7700-sys.github.io/price-compare/icon.jpg">
+  <link rel="icon" type="image/jpeg" href="icon.jpg">
+  <link rel="apple-touch-icon" href="icon.jpg">
 
   <style>
     body { margin: 0; font-family: Arial, sans-serif; background: linear-gradient(135deg, #0f9b8e, #48c6ef); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-    .app { background: #ffffffee; border-radius: 18px; padding: 20px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.18); }
+    .app { background: #ffffffee; border-radius: 18px; padding: 20px; width: 90%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.18); }
     h1 { text-align: center; margin: 0 0 10px; font-size: 22px; }
     .product-card { background: #f7f9fb; border-radius: 12px; padding: 12px; margin-bottom: 12px; border: 1px solid #e1e5ee; position: relative; }
-    .remove-btn { position: absolute; top: 8px; left: 8px; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 26px; height: 26px; cursor: pointer; font-size: 16px; line-height: 26px; text-align: center; }
+    .remove-btn { position: absolute; top: 8px; left: 8px; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 26px; height: 26px; cursor: pointer; font-size: 16px; line-height: 26px; }
     .product-title { font-weight: bold; margin-bottom: 8px; font-size: 15px; }
-    label { display: block; font-size: 13px; margin-top: 6px; margin-bottom: 2px; }
-    input { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #cfd6e6; box-sizing: border-box; font-size: 14px; }
-    button { width: 100%; padding: 10px; border-radius: 999px; border: none; background: #0f9b8e; color: white; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
-    #addBtn { background: #1976d2; margin-bottom: 10px; }
-    .result { margin-top: 16px; padding: 12px; border-radius: 12px; background: #f1fbf8; border: 1px solid #b9e7d9; font-size: 14px; line-height: 1.5; white-space: pre-line; }
+    label { display: block; font-size: 13px; margin-top: 6px; }
+    input { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #cfd6e6; box-sizing: border-box; }
+    button { width: 100%; padding: 12px; border-radius: 999px; border: none; background: #0f9b8e; color: white; font-weight: 600; cursor: pointer; margin-top: 10px; }
+    #addBtn { background: #1976d2; }
+    .result { margin-top: 16px; padding: 12px; border-radius: 12px; background: #f1fbf8; border: 1px solid #b9e7d9; white-space: pre-line; }
   </style>
 </head>
 <body>
@@ -41,12 +39,12 @@
   </div>
 
   <script>
-    // רישום Service Worker
+    // רישום ה-Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').then(reg => {
-          console.log('Service Worker Registered');
-        }).catch(err => console.log('SW Registration failed:', err));
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW registered'))
+          .catch(err => console.log('SW error', err));
       });
     }
 
@@ -56,14 +54,10 @@
       const container = document.getElementById("products");
       const card = document.createElement("div");
       card.className = "product-card";
-      card.innerHTML = `
-        <button class="remove-btn" onclick="removeProduct(this)">×</button>
+      card.innerHTML = `<button class="remove-btn" onclick="removeProduct(this)">×</button>
         <div class="product-title">מוצר ${productCount}</div>
-        <label>מחיר (₪):</label>
-        <input type="number" class="price" inputmode="decimal">
-        <label>משקל (גרם):</label>
-        <input type="number" class="weight" inputmode="decimal">
-      `;
+        <label>מחיר (₪):</label><input type="number" class="price" inputmode="decimal">
+        <label>משקל (גרם):</label><input type="number" class="weight" inputmode="decimal">`;
       container.appendChild(card);
       updateTitles();
     }
@@ -71,28 +65,18 @@
     function updateTitles() {
       document.querySelectorAll(".product-title").forEach((t, i) => { t.textContent = `מוצר ${i + 1}`; });
     }
-    function calcPricePerKg(price, grams) {
-      return (!price || !grams || grams <= 0) ? null : price / (grams / 1000);
-    }
     function compare() {
       const prices = [...document.querySelectorAll(".price")].map(i => parseFloat(i.value));
       const weights = [...document.querySelectorAll(".weight")].map(i => parseFloat(i.value));
-      if (prices.length === 0) { document.getElementById("result").textContent = "אין מוצרים להשוואה."; return; }
-      const results = [];
-      for (let i = 0; i < prices.length; i++) {
-        const ppk = calcPricePerKg(prices[i], weights[i]);
-        if (ppk === null) { document.getElementById("result").textContent = "נא למלא נתונים תקינים."; return; }
-        results.push({ index: i + 1, ppk });
+      const results = prices.map((p, i) => ({ index: i + 1, ppk: p / (weights[i] / 1000) }));
+      
+      if (results.some(r => isNaN(r.ppk))) {
+        document.getElementById("result").textContent = "נא למלא נתונים תקינים.";
+        return;
       }
       results.sort((a, b) => a.ppk - b.ppk);
-      let text = "";
-      results.forEach(r => { text += `מוצר ${r.index}: ${r.ppk.toFixed(2)} ₪ לק״ג\n`; });
-      const cheapest = results[0];
-      text += `\nהזול ביותר: מוצר ${cheapest.index}\n`;
-      if (results.length > 1) {
-        const diff = ((results[1].ppk - cheapest.ppk) / cheapest.ppk) * 100;
-        text += `הפער מול הבא אחריו: ${diff.toFixed(1)}%`;
-      }
+      let text = results.map(r => `מוצר ${r.index}: ${r.ppk.toFixed(2)} ₪ לק״ג`).join('\n');
+      text += `\n\nהזול ביותר: מוצר ${results[0].index}`;
       document.getElementById("result").textContent = text;
     }
     addProduct(); addProduct();
