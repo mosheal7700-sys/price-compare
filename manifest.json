@@ -1,0 +1,15 @@
+{
+  "name": "השוואת מחיר לפי משקל",
+  "short_name": "מחיר/משקל",
+  "start_url": "price-compare.html",
+  "display": "standalone",
+  "background_color": "#0f9b8e",
+  "theme_color": "#0f9b8e",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
