@@ -4,211 +4,85 @@
   <meta charset="UTF-8">
   <title>השוואת מחיר לפי משקל</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <link rel="icon" href="icon.png">
-  <link rel="apple-touch-icon" href="icon.png">
-<link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.jpg"> <link rel="apple-touch-icon" href="icon.jpg">
+  <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #0f9b8e, #48c6ef);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .app {
-      background: #ffffffee;
-      border-radius: 18px;
-      padding: 20px;
-      width: 100%;
-      max-width: 450px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.18);
-    }
-    h1 {
-      text-align: center;
-      margin: 0 0 10px;
-      font-size: 22px;
-    }
-    .product-card {
-      background: #f7f9fb;
-      border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 12px;
-      border: 1px solid #e1e5ee;
-      position: relative;
-    }
-    .remove-btn {
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      background: #ff4d4d;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 26px;
-      height: 26px;
-      cursor: pointer;
-      font-size: 16px;
-      line-height: 26px;
-      text-align: center;
-    }
-    .product-title {
-      font-weight: bold;
-      margin-bottom: 8px;
-      font-size: 15px;
-    }
-    label {
-      display: block;
-      font-size: 13px;
-      margin-top: 6px;
-      margin-bottom: 2px;
-    }
-    input {
-      width: 100%;
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid #cfd6e6;
-      box-sizing: border-box;
-      font-size: 14px;
-    }
-    button {
-      width: 100%;
-      padding: 10px;
-      border-radius: 999px;
-      border: none;
-      background: #0f9b8e;
-      color: white;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    #addBtn {
-      background: #1976d2;
-      margin-bottom: 10px;
-    }
-    .result {
-      margin-top: 16px;
-      padding: 12px;
-      border-radius: 12px;
-      background: #f1fbf8;
-      border: 1px solid #b9e7d9;
-      font-size: 14px;
-      line-height: 1.5;
-      white-space: pre-line;
-    }
+    body { margin: 0; font-family: Arial, sans-serif; background: linear-gradient(135deg, #0f9b8e, #48c6ef); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .app { background: #ffffffee; border-radius: 18px; padding: 20px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.18); }
+    h1 { text-align: center; margin: 0 0 10px; font-size: 22px; }
+    .product-card { background: #f7f9fb; border-radius: 12px; padding: 12px; margin-bottom: 12px; border: 1px solid #e1e5ee; position: relative; }
+    .remove-btn { position: absolute; top: 8px; left: 8px; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 26px; height: 26px; cursor: pointer; font-size: 16px; line-height: 26px; text-align: center; }
+    .product-title { font-weight: bold; margin-bottom: 8px; font-size: 15px; }
+    label { display: block; font-size: 13px; margin-top: 6px; margin-bottom: 2px; }
+    input { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #cfd6e6; box-sizing: border-box; font-size: 14px; }
+    button { width: 100%; padding: 10px; border-radius: 999px; border: none; background: #0f9b8e; color: white; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+    #addBtn { background: #1976d2; margin-bottom: 10px; }
+    .result { margin-top: 16px; padding: 12px; border-radius: 12px; background: #f1fbf8; border: 1px solid #b9e7d9; font-size: 14px; line-height: 1.5; white-space: pre-line; }
   </style>
 </head>
 <body>
   <div class="app">
     <h1>השוואת מחיר לפי משקל</h1>
-
     <button id="addBtn" onclick="addProduct()">+ הוסף מוצר</button>
-
     <div id="products"></div>
-
     <button onclick="compare()">השווה</button>
-
     <div class="result" id="result">הזן מוצרים ולחץ על "השווה".</div>
   </div>
 
   <script>
-    let productCount = 0;
+    // רישום ה-Service Worker (התיקון הקריטי)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then(reg => {
+          console.log('SW Registered!');
+        }).catch(err => console.log('SW Reg error:', err));
+      });
+    }
 
+    let productCount = 0;
     function addProduct() {
       productCount++;
       const container = document.getElementById("products");
-
       const card = document.createElement("div");
       card.className = "product-card";
-
-      card.innerHTML = `
-        <button class="remove-btn" onclick="removeProduct(this)">×</button>
+      card.innerHTML = `<button class="remove-btn" onclick="removeProduct(this)">×</button>
         <div class="product-title">מוצר ${productCount}</div>
-        <label>מחיר (₪):</label>
-        <input type="number" class="price">
-        <label>משקל (גרם):</label>
-        <input type="number" class="weight">
-      `;
-
+        <label>מחיר (₪):</label><input type="number" class="price">
+        <label>משקל (גרם):</label><input type="number" class="weight">`;
       container.appendChild(card);
       updateTitles();
     }
-
-    function removeProduct(btn) {
-      btn.parentElement.remove();
-      updateTitles();
-    }
-
+    function removeProduct(btn) { btn.parentElement.remove(); updateTitles(); }
     function updateTitles() {
-      const titles = document.querySelectorAll(".product-title");
-      titles.forEach((t, i) => {
-        t.textContent = `מוצר ${i + 1}`;
-      });
+      document.querySelectorAll(".product-title").forEach((t, i) => { t.textContent = `מוצר ${i + 1}`; });
     }
-
-    function calcPricePerKg(price, grams) {
-      if (!price || !grams || grams <= 0) return null;
-      return price / (grams / 1000);
-    }
-
+    function calcPricePerKg(price, grams) { return (!price || !grams || grams <= 0) ? null : price / (grams / 1000); }
     function compare() {
       const prices = [...document.querySelectorAll(".price")].map(i => parseFloat(i.value));
       const weights = [...document.querySelectorAll(".weight")].map(i => parseFloat(i.value));
-
-      if (prices.length === 0) {
-        document.getElementById("result").textContent = "אין מוצרים להשוואה.";
-        return;
-      }
-
+      if (prices.length === 0) { document.getElementById("result").textContent = "אין מוצרים להשוואה."; return; }
       const results = [];
       for (let i = 0; i < prices.length; i++) {
         const ppk = calcPricePerKg(prices[i], weights[i]);
-        if (ppk === null) {
-          document.getElementById("result").textContent = "נא למלא נתונים תקינים.";
-          return;
-        }
+        if (ppk === null) { document.getElementById("result").textContent = "נא למלא נתונים תקינים."; return; }
         results.push({ index: i + 1, ppk });
       }
-
       results.sort((a, b) => a.ppk - b.ppk);
-
       let text = "";
-      results.forEach(r => {
-        text += `מוצר ${r.index}: ${r.ppk.toFixed(2)} ₪ לק״ג\n`;
-      });
-
+      results.forEach(r => { text += `מוצר ${r.index}: ${r.ppk.toFixed(2)} ₪ לק״ג\n`; });
       const cheapest = results[0];
       text += `\nהזול ביותר: מוצר ${cheapest.index}\n`;
-
       if (results.length > 1) {
-        const second = results[1];
-        const diff = ((second.ppk - cheapest.ppk) / cheapest.ppk) * 100;
+        const diff = ((results[1].ppk - cheapest.ppk) / cheapest.ppk) * 100;
         text += `הפער מול הבא אחריו: ${diff.toFixed(1)}%`;
       }
-
       document.getElementById("result").textContent = text;
     }
-
-    addProduct();
-    addProduct();
+    addProduct(); addProduct();
   </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(reg => console.log('Service Worker registered!'))
-        .catch(err => console.error('Service Worker failed:', err));
-    });
-  }
-</script>
 </body>
 </html>
-
