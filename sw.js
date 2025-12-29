@@ -1,4 +1,4 @@
-const CACHE_NAME = 'price-compare-v1';
+const CACHE_NAME = 'price-compare-v2';
 const urlsToCache = [
   './',
   './index.html',
@@ -46,6 +46,7 @@ self.addEventListener('fetch', event => {
       .catch(() => caches.match(event.request))
   );
 });
+
 
 
 
