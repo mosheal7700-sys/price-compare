@@ -1,7 +1,7 @@
 {
   "name": "השוואת מחיר לפי משקל",
   "short_name": "מחיר/משקל",
-  "start_url": "index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f9b8e",
   "theme_color": "#0f9b8e",
