@@ -1,13 +1,11 @@
-const CACHE_NAME = 'queue-app-FINAL-FIX-v14'; // העליתי גרסה ל-10
-
+const CACHE_NAME = 'price-compare-v1';
 const urlsToCache = [
-  './',                  // התיקייה עצמה
-  './index.html',   
-  './price-compare.html',        // הקובץ הראשי (חובה!)
-  './manifest.json', // המניפסט שלך
-  './icon.png' 
-
-  ];
+  './',
+  './index.html',
+  './price-compare.html',
+  './manifest.json',
+  './icon.jpg' 
+];
 
 // --- מכאן והלאה הקוד שלך מצוין, לא נגעתי ---
 
@@ -48,5 +46,6 @@ self.addEventListener('fetch', event => {
       .catch(() => caches.match(event.request))
   );
 });
+
 
 
