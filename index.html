@@ -24,14 +24,49 @@
   <link rel="apple-touch-icon" href="icon.png">
 
   <style>
+    .result b {
+    color: #0f9b8e;
+    font-size: 1.1em;
+}
     body { margin: 0; font-family: Arial, sans-serif; background: linear-gradient(135deg, #0f9b8e, #48c6ef); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
     .app { background: #ffffffee; border-radius: 18px; padding: 20px; width: 90%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.18); }
     h1 { text-align: center; margin: 0 0 10px; font-size: 22px; }
     .product-card { background: #f7f9fb; border-radius: 12px; padding: 12px; margin-bottom: 12px; border: 1px solid #e1e5ee; position: relative; }
-    .remove-btn { position: absolute; top: 8px; left: 8px; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 26px; height: 26px; cursor: pointer; font-size: 16px; line-height: 26px; }
+.remove-btn {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  
+  /* פתרון המרכז המדויק */
+  display: flex;
+  align-items: center;    /* מרכוז אנכי */
+  justify-content: center; /* מרכוז אופקי */
+  
+  /* ביטול הגדרות קודמות שעלולות להפריע */
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+}  
     .product-title { font-weight: bold; margin-bottom: 8px; font-size: 15px; }
     label { display: block; font-size: 13px; margin-top: 6px; }
+#clearBtn {
+  background: #6c757d; /* צבע אפור סולידי */
+  margin-top: 8px;     /* מעט רווח מהכפתור שמעליו */
+  font-size: 14px;     /* מעט קטן יותר מכפתור ההשוואה */
+}
 
+#clearBtn:hover {
+  background: #5a6268; /* אפקט מעבר עכבר */
+}
 
     input { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #cfd6e6; box-sizing: border-box; }
     button { width: 100%; padding: 12px; border-radius: 999px; border: none; background: #0f9b8e; color: white; font-weight: 600; cursor: pointer; margin-top: 10px; }
@@ -43,12 +78,16 @@
   <div class="app">
     <h1>השוואת מחיר לפי משקל</h1>
     <button id="addBtn" onclick="addProduct()">+ הוסף מוצר</button>
-    <div id="products"></div>
+<div id="products"></div>
+
     <button onclick="compare()">השווה</button>
+    
+    <button id="clearBtn" onclick="clearData()">ניקוי נתונים</button>
+
     <div class="result" id="result">הזן מוצרים ולחץ על "השווה".</div>
   </div>
-    <button onclick="clearData()" style="background: #6c757d; margin-top: 5px;">ניקוי נתונים</button>
-  <button onclick="clearData()" style="background: #6c757d; margin-top: 5px;">ניקוי נתונים</button>
+
+
   <script>
     // רישום ה-Service Worker
     if ('serviceWorker' in navigator) {
@@ -65,7 +104,7 @@
       const container = document.getElementById("products");
       const card = document.createElement("div");
       card.className = "product-card";
-      card.innerHTML = `<button class="remove-btn" onclick="removeProduct(this)">×</button>
+      card.innerHTML = `<button class="remove-btn" onclick="removeProduct(this)">X</button>
         <div class="product-title">מוצר ${productCount}</div>
         <label>מחיר (₪):</label><input type="number" class="price" inputmode="decimal">
         <label>משקל (גרם):</label><input type="number" class="weight" inputmode="decimal">`;
@@ -76,20 +115,45 @@
     function updateTitles() {
       document.querySelectorAll(".product-title").forEach((t, i) => { t.textContent = `מוצר ${i + 1}`; });
     }
-    function compare() {
-      const prices = [...document.querySelectorAll(".price")].map(i => parseFloat(i.value));
-      const weights = [...document.querySelectorAll(".weight")].map(i => parseFloat(i.value));
-      const results = prices.map((p, i) => ({ index: i + 1, ppk: p / (weights[i] / 1000) }));
-      
-      if (results.some(r => isNaN(r.ppk))) {
-        document.getElementById("result").textContent = "נא למלא נתונים תקינים.";
-        return;
-      }
-      results.sort((a, b) => a.ppk - b.ppk);
-      let text = results.map(r => `מוצר ${r.index}: ${r.ppk.toFixed(2)} ₪ לק״ג`).join('\n');
-      text += `\n\nהזול ביותר: מוצר ${results[0].index}`;
-      document.getElementById("result").textContent = text;
+function compare() {
+    const prices = [...document.querySelectorAll(".price")].map(i => parseFloat(i.value));
+    const weights = [...document.querySelectorAll(".weight")].map(i => parseFloat(i.value));
+    const resultDiv = document.getElementById("result");
+
+    // יצירת רשימת תוצאות
+    let results = [];
+    for (let i = 0; i < prices.length; i++) {
+        const ppk = prices[i] / (weights[i] / 1000);
+        if (isNaN(ppk) || ppk <= 0) {
+            resultDiv.textContent = "נא למלא נתונים תקינים בכל השדות.";
+            return;
+        }
+        results.push({ index: i + 1, ppk: ppk });
     }
+
+    // מציאת המחיר המינימלי
+    const minPrice = Math.min(...results.map(r => r.ppk));
+    
+    // מציאת כל המוצרים שמשתווים למחיר המינימלי (למקרה של שוויון)
+    const cheapestProducts = results.filter(r => r.ppk === minPrice);
+    const cheapestIndices = cheapestProducts.map(p => p.index).join(' ו-');
+
+    // בניית טקסט התוצאות
+    let outputHTML = "";
+    results.forEach(r => {
+        let diffText = "";
+        if (r.ppk > minPrice) {
+            const diffPercent = ((r.ppk - minPrice) / minPrice) * 100;
+            diffText = ` <span style="color: #d32f2f; font-size: 0.9em;">(יקר ב-${diffPercent.toFixed(1)}%)</span>`;
+        }
+        outputHTML += `מוצר ${r.index}: ${r.ppk.toFixed(2)} ₪ לק"ג${diffText}<br>`;
+    });
+
+    // הדגשת השורה התחתונה
+    outputHTML += `<br><b>הזול ביותר: מוצר ${cheapestIndices}</b>`;
+    
+    resultDiv.innerHTML = outputHTML;
+}
     addProduct(); addProduct();
 
     function clearData() {
@@ -105,12 +169,4 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
 
