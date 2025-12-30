@@ -45,7 +45,7 @@
     <button onclick="compare()">השווה</button>
     <div class="result" id="result">הזן מוצרים ולחץ על "השווה".</div>
   </div>
-
+<button onclick="clearData()" style="background: #6c757d; margin-top: 5px;">ניקוי נתונים</button>
   <script>
     // רישום ה-Service Worker
     if ('serviceWorker' in navigator) {
@@ -88,9 +88,21 @@
       document.getElementById("result").textContent = text;
     }
     addProduct(); addProduct();
+
+    function clearData() {
+  // איפוס כל השדות של המחיר והמשקל
+  document.querySelectorAll(".price, .weight").forEach(input => input.value = "");
+  
+  // איפוס תיבת התוצאה
+  document.getElementById("result").textContent = "הזן מוצרים ולחץ על 'השווה'.";
+  
+  // גלילה חזרה למעלה (אופציונלי)
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
   </script>
 </body>
 </html>
+
 
 
 
